@@ -1,11 +1,11 @@
-// src/context/AuthContext.js
 import React, { createContext, useState, useContext } from 'react';
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
+  const userType = sessionStorage.getItem("user_type")
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    return sessionStorage.getItem("token") !== null; // Initialize from sessionStorage
+    return sessionStorage.getItem("token") !== null; 
   });
 
   const login = () => {
@@ -23,7 +23,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, login, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, login, logout, userType }}>
       {children}
     </AuthContext.Provider>
   );

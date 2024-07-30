@@ -59,7 +59,7 @@ function SignIn() {
         if (userData.password_reset_count === "0") {
           setChangepwd(true);
         } else {
-          window.location.href = "/dashboard";
+          window.location.href = "/admin/elu-dashboard";
         }
       } else {
         Swal.fire(

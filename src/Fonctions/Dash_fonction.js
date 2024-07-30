@@ -30,7 +30,11 @@ export const useIncidentData = () => {
     const [percentageVsTaken, setPercentageVsTaken] = useState(0);
     const [percentageVsResolved, setPercentageVsResolved] = useState(0);
     const [taken, setTaken] = useState(0);
+    const [countTake, setCountTake] = useState(0)
+    const [collaboration, setCollaboration] = useState([]);
     const [incidents, setIncident] = useState([]);
+    const [countActions, setCountActions] = useState(0);
+    const [PercentageIncrease, setPercentageIncrease] = useState(0);
     const [countIncidents, setCountIncidents] = useState(0);
     const [resolus, setResolus] = useState(0);
     const [categoryData, setCategoryData] = useState({});
@@ -214,6 +218,8 @@ export const useIncidentData = () => {
             console.log(error.message);
         }
     };
+    const userId = sessionStorage.getItem('user_id');
+    console.log('useeeeer', userId)
 
     const _getIncidents = async () => {
         var url = `${config.url}/MapApi/incidentByMonth/?month=${selectedMonth}`;
@@ -230,6 +236,62 @@ export const useIncidentData = () => {
             console.log(error.message);
         }
     };
+    const _getActions = async () => {
+        const currentMonth = selectedMonth;
+        const previousMonth = currentMonth === 1 ? 12 : currentMonth - 1;
+        const urlCurrent = `${config.url}/MapApi/incidentByMonth/?month=${currentMonth}`;
+        const urlPrevious = `${config.url}/MapApi/incidentByMonth/?month=${previousMonth}`;
+        var url = `${config.url}/MapApi/incidentByMonth/?month=${selectedMonth}`;
+        try {
+            const [responseCurrent, responsePrevious] = await Promise.all([
+                axios.get(urlCurrent, { headers: { Authorization: `Bearer ${sessionStorage.token}`, 'Content-Type': 'application/json' } }),
+                axios.get(urlPrevious, { headers: { Authorization: `Bearer ${sessionStorage.token}`, 'Content-Type': 'application/json' } })
+            ]);
+            const currentAct = responseCurrent.data.data.filter(incident => String(incident.taken_by) === String(userId)).length;
+            const previousAct = responsePrevious.data.data.filter(incident => String(incident.taken_by) === String(userId)).length;
+            
+            setCountActions(currentAct);
+            const percentageIncrease = previousAct > 0
+                ? ((currentAct - previousAct) / previousAct) * 100
+                : 0;
+            setPercentageIncrease(percentageIncrease);
+
+        } catch (error) {
+            console.log(error.message);
+        }
+    };
+
+
+    const _getIncidentsCollabor = async () => {
+        var url = `${config.url}/MapApi/incidentByMonth/?month=${selectedMonth}`
+        try {
+            let res = await axios.get(url, {
+                headers: {
+                    Authorization: `Bearer${sessionStorage.token}`,
+                    'Content-Type': 'application/json',
+                },
+            })
+            setCountTake(res.data.data.filter(incident => incident.etat === "taken_into_account").length);
+            setData(res.data.data.filter(incident => incident.etat === "taken_into_account"));
+        } catch (error) {
+            console.log(error.message)
+        }
+    }
+    const _getCollaboration = async () => {
+        var url = `${config.url}/MapApi/collaboration/`
+        try {
+            let res = await axios.get(url, {
+                headers: {
+                    Authorization: `Bearer${sessionStorage.token}`,
+                    'Content-Type': 'application/json',
+                },
+            })
+            setCollaboration(res.data.length)
+            console.log("Les collaboration", res.data.length)
+        } catch (error) {
+            console.log(error.message)
+        }
+    }
 
     const _getIncidentsResolved = async () => {
         var url = `${config.url}/MapApi/incidentByMonth/?month=${selectedMonth}`;
@@ -458,5 +520,12 @@ export const useIncidentData = () => {
         ResolvedOnMap,
         onShowIncident,
         onShowIncidentCollaboration,
+        countTake,
+        _getIncidentsCollabor,
+        _getActions,
+        countActions,
+        PercentageIncrease,
+        _getCollaboration,
+        collaboration
     };
 };

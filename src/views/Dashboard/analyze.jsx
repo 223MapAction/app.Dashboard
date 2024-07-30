@@ -37,7 +37,16 @@ export default function Analyze() {
     piste_solution,
     impact_potentiel,
     type_incident,
+    fetchPredictions
   } = IncidentData();
+  
+  useEffect ( () => {
+    async function fetchData (){
+      await fetchPredictions()
+    }
+    fetchData();
+    
+  }, [])
 
   const { colorMode } = useColorMode();
   const textColor = useColorModeValue("gray.700", "white");

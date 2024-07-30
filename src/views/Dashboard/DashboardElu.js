@@ -40,11 +40,8 @@ import { useIncidentData } from "Fonctions/Dash_fonction";
 
 const positions = [16.2833, -3.0833]
 
-
-
-export default function Dashboard() {
+export default function EluDashboard() {
   const [percentageAnonymous, setAnonymousPercentage] = useState(0);
-  // const [countIncidents, setCountIncidents] = useState('');
   const {
     onShowIncident,
     selectedMonth,

@@ -36,7 +36,8 @@ export const IncidentData = () =>{
         };
         const fetchPredictions = async () => {
             try {
-                const response = await axios.get(`${config.url}/MapApi/prediction/${predictionId}`);
+                console.log("incident", incidentId)
+                const response = await axios.get(`${config.url}/MapApi/Incidentprediction/${incidentId}`);
                 console.log("les reponses du serveur", response.data)
                 setPredictions(response.data[0]);
 
@@ -46,10 +47,19 @@ export const IncidentData = () =>{
         };
         if (incidentId) {
             fetchIncident();
-            fetchPredictions 
+            fetchPredictions() 
         }
     }, [incidentId]);
+    const fetchPredictions = async () => {
+        try {
+            const response = await axios.get(`${config.url}/MapApi/prediction/${incidentId}`);
+            console.log("les reponses du serveur", response.data)
+            setPredictions(response.data[0]);
 
+        } catch (error) {
+            console.error('Erreur lors de la récupération des prédictions :', error);
+        }
+    };
     const [incident, setIncident] = useState({});
     const [videoIsLoading, setVideoIsLoading] = useState(false); 
     const imgUrl = incident ? config.url + incident.photo : '';
@@ -260,7 +270,8 @@ export const IncidentData = () =>{
         impact_potentiel,
         type_incident,
         EditIncident,
-        handleSelectChange
+        handleSelectChange,
+        fetchPredictions
     }
 }    
     

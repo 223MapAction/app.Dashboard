@@ -35,7 +35,7 @@ import {
 import { RiMessage2Fill } from "react-icons/ri";
 import { IoStatsChart } from "react-icons/io5";
 
-import Carte from "variables/maps";
+import Carte from "variables/MapsCollabor";
 // Fonctions
 import { useIncidentData } from "Fonctions/Dash_fonction";
 
@@ -47,77 +47,24 @@ export default function Dashboard() {
     const [percentageAnonymous, setAnonymousPercentage] = useState(0);
     const [getPercentageVsTaken, setPercentageVsTaken] = useState(0);
 
-    // const [countIncidents, setCountIncidents] = useState('');
     const {
         onShowIncidentCollaboration,
         selectedMonth,
-        setSelectedMonth,
-        anonymousPercentage,
-        registeredPercentage,
         percentageVs,
-        percentageVsTaken,
-        percentageVsResolved,
-        taken,
-        incidents,
-        setCountIncidents,
-        setResolus,
-        setRegisteredPercentage,
-        setPercentageVs,
-        setPercentageVsResolved,
-        countIncidents,
-        resolus,
-        categoryData,
-        zoneData,
-        showOnlyTakenIntoAccount,
-        setShowOnlyTakenIntoAccount,
-        showOnlyResolved,
-        setShowOnlyResolved,
-        showOnlyDeclared,
-        setShowOnlyDeclared,
-        handleMonthChange,
-        _getAnonymous,
-        _getRegistered,
-        _getIndicateur,
-        _getPercentage,
-        _getPercentageVsPreviousMonth,
-        _getPercentageVsTaken,
-        _getPercentageVsResolved,
-        _getIncidents,
-        _getIncidentsResolved,
-        _getCategory,
-        getIncidentById,
-        _getZone,
-        filterIncidents,
-        displayIcon,
-        chartRef,
-        IndicateurChart,
-        preduct,
-        TakenOnMap,
-        DeclaredOnMap,
-        ResolvedOnMap
+        countTake,
+        _getIncidentsCollabor,
+        _getCollaboration,
+        collaboration,
+        
     } = useIncidentData();
 
     // Chakra Color Mode
-    const iconBlue = useColorModeValue("blue.500", "blue.500");
-    const iconBoxInside = useColorModeValue("white", "white");
     const textColor = useColorModeValue("gray.700", "white");
-    const tableRowColor = useColorModeValue("#F7FAFC", "navy.900");
-    const borderColor = useColorModeValue("gray.200", "gray.600");
-    const textTableColor = useColorModeValue("gray.500", "white");
-
     const { colorMode } = useColorMode();
     useEffect(() => {
-        // Appel des fonctions pour récupérer les données
         async function fetchData() {
-            const incidents = await _getIncidents();
-            const incidentsResolved = await _getIncidentsResolved();
-            const anonymous = await _getAnonymous();
-            const registered = await _getRegistered();
-            const percentage = await _getPercentage();
-            const percentageVs = await _getPercentageVsPreviousMonth();
-            const percentageResolved = await _getPercentageVsResolved();
-            await _getPercentageVsTaken();
-            await _getCategory()
+            await _getIncidentsCollabor()
+            await _getCollaboration()
         }
 
         fetchData();
@@ -144,7 +91,7 @@ export default function Dashboard() {
                                 </StatLabel>
                                 <Flex>
                                     <StatNumber fontSize='lg' color={textColor} fontWeight='bold'>
-                                        {countIncidents}
+                                        {countTake}
                                     </StatNumber>
                                 </Flex>
                             </Stat>
@@ -181,7 +128,7 @@ export default function Dashboard() {
                                 </StatLabel>
                                 <Flex>
                                     <StatNumber fontSize='lg' color={textColor} fontWeight='bold'>
-                                        {getPercentageVsTaken}
+                                        {collaboration}
                                     </StatNumber>
                                 </Flex>
                             </Stat>
@@ -218,7 +165,7 @@ export default function Dashboard() {
                                 </StatLabel>
                                 <Flex>
                                     <StatNumber fontSize='lg' color={textColor} fontWeight='bold'>
-                                        {countIncidents}
+                                        {""}
                                     </StatNumber>
                                 </Flex>
                             </Stat>

@@ -30,16 +30,16 @@ import { SidebarHelp } from "components/Sidebar/SidebarHelp";
 import React from "react";
 import { Scrollbars } from "react-custom-scrollbars";
 import { NavLink, useLocation } from "react-router-dom";
-
+import { useAuth } from "context/AuthContext";
 
 
 // FUNCTIONS
 
 function Sidebar(props) {
 
-  console.log(props, 'jjjjjjjjjjjjjjjjjjjjjjjjjj')
   // to check for active links and opened collapses
   let location = useLocation();
+  const { userType } = useAuth();
   // this is for the rest of the collapses
   const [state, setState] = React.useState({});
   const mainPanel = React.useRef();
@@ -59,7 +59,8 @@ function Sidebar(props) {
     let inactiveColor = useColorModeValue("gray.400", "gray.400");
     let sidebarActiveShadow = "0px 7px 11px rgba(0, 0, 0, 0.04)";
     return routes
-    .filter(prop => prop.name !== "Sign In" && prop.name !== "Sign Up")
+    .filter(prop => prop.name !== "Sign In" && prop.name !== "Sign Up" && prop.name !== "Error" && prop.name !== "Vue d'ensemble" && prop.name !== "Analyse avancé" && prop.name !== "Demande collaboration")
+    .filter(prop => !prop.roles || prop.roles.includes(userType))
     .map((prop, key) => {
       if (prop.redirect) {
         return null;
@@ -295,7 +296,7 @@ export function SidebarResponsive(props) {
   // this function creates the links and collapses that appear in the sidebar (left menu)
   const createLinks = (routes) => {
     return routes
-    .filter(prop => prop.name !== "Sign In" && prop.name !== "Sign Up")
+    .filter(prop => prop.name !== "Sign In" && prop.name !== "Sign Up" && prop.name !== "Error" && prop.name !== "Vue d'ensemble" && prop.name !== "Analyse avancé" && prop.name !== "Demande collaboration")
     .map((prop, key) => {
       if (prop.redirect) {
         return null;

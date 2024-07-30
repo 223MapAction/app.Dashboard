@@ -9,7 +9,10 @@ import {
   useColorMode,
   useColorModeValue,
   Input,
-  Spinner
+  Spinner,
+  Avatar,
+  Checkbox,
+  VStack
 } from "@chakra-ui/react";
 import Card from "components/Card/Card.js";
 import { IncidentData } from "Fonctions/Incident_fonction";
@@ -20,46 +23,80 @@ import ReactDOMServer from 'react-dom/server';
 import Select from 'react-select'
 import Swal from 'sweetalert2';
 import axios from 'axios';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { config } from "config";
 
 
-
-const userId = sessionStorage.getItem('user_id');
-
-
 export default function GlobalViewCollaboration() {
+  const [items, setItems] = useState([
+    { id: 1, label: 'Avoir plus d\'informations sur l\'incident', checked: false },
+    { id: 2, label: "Proposer un partage d'informations et/ou de ressources sur l'incident", checked: false },
+    { id: 3, label: "Proposer une collaboration technique sur l'incident", checked: false },
+    { id: 4, label: "Autres", checked: false },
+  ]);
+
+  const handleCheck = (id) => {
+    setItems((prevItems) =>
+      prevItems.map((item) =>
+        item.id === id ? { ...item, checked: !item.checked } : item
+      )
+    );
+  };
+
+  const handleSubmit = () => {
+    const checkedItems = items.filter((item) => item.checked);
+    console.log('Checked Items:', checkedItems);
+  };
+
   const {
-    optionstype,
     latitude,
     longitude,
-    videoUrl,
     imgUrl,
-    audioUrl,
-    description,
     position,
     date,
     heure,
-    handleNavigate,
-    videoIsLoading,
-    setVideoIsLoading,
     incident,
-    EditIncident,
-    handleSelectChange,
-    handleChangeStatus
   } = IncidentData();
-
+  const [collaborations, setCollaborations] = useState([]);
+  const userId = sessionStorage.getItem('user_id');
+  const { incidentId } = useParams(); 
   const { colorMode } = useColorMode();
   const textColor = useColorModeValue("gray.700", "white");
   const [selectedDate, setSelectedDate] = useState('');
   const [newCollaborationData, setNewCollaborationData] = useState({
-    incident: incident.id,
+    incident: incidentId,
     user: userId,
     end_date: ''
-});
+  });
+  const [userDetails, setUserDetails] = useState({});
+  const avatar = config.url + userDetails.avatar
+  console.log('avatar', avatar)
+  useEffect(() => {
+    setNewCollaborationData({
+      incident: incidentId,
+      user: userId,
+      end_date: selectedDate
+    });
+
+    getIncidentDetails();
+  }, [incidentId, userId, selectedDate]);
+
   const handleDateChange = (e) => {
     setSelectedDate(e.target.value);
+    setNewCollaborationData({
+      ...newCollaborationData,
+      end_date: e.target.value
+    });
   };
 
+  const fetchCollaborations = async () => {
+    try {
+        const response = await axios.get(`${config.url}/MapApi/collaboration`);
+        setCollaborations(response.data);
+    } catch (error) {
+        console.error('Erreur lors de la récupération des collaborations : ', error);
+    }
+  };
 
   const createCollaboration = async () => {
     try {
@@ -73,10 +110,32 @@ export default function GlobalViewCollaboration() {
         return response;
         // fetchCollaborations();
     } catch (error) {
-        console.error('Erreur lors de la création de la collaboration : ', error);
+      console.error('Erreur lors de la création de la collaboration : ', error.response.data);
+      throw error;
+    }
+  };
+
+  const getIncidentDetails = async () => {
+    try {
+        const url = `${config.url}/MapApi/incidentDetail/${incidentId}`;
+        const token = sessionStorage.getItem("token");
+        console.log("Requesting URL:", url);
+        console.log("Using token:", token);
+
+        const response = await axios.get(url, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+        });
+
+        setUserDetails(response.data.user);
+        console.log("Incident details", response.data);
+    } catch (error) {
+        console.error('Error fetching incident details:', error);
         throw error;
     }
-};
+  };
 
   const sendDate = async (e) => {
     if(selectedDate == ''){
@@ -203,6 +262,7 @@ export default function GlobalViewCollaboration() {
           <Text fontSize='xs' p="10px" color='textColor' fontWeight='bold'>
             Déterminer la date de clôture de la collaboration.
           </Text>
+          
           <Input
             type="date"
             onChange={handleDateChange}
@@ -213,6 +273,18 @@ export default function GlobalViewCollaboration() {
             boxShadow='0 0 0 1px #2684FF'
           />
         </Box>
+        <VStack align="start" spacing={4} p='22px'>
+          <Text>Quelles sont vos motivations pour la demande de collaboration ?</Text>
+            {items.map((item) => (
+              <Checkbox
+                key={item.id}
+                isChecked={item.checked}
+                onChange={() => handleCheck(item.id)}
+              >
+                {item.label}
+              </Checkbox>
+            ))}
+          </VStack>
         <Box pl="25px">
           <Button onClick={() => sendDate()} colorScheme='blue' w="200px">Envoyer</Button>
         </Box>
@@ -238,15 +310,25 @@ export default function GlobalViewCollaboration() {
 
         </Card>
 
-        <Card p='0px' maxW={{ sm: "320px", md: "100%" }}>
-          <Flex direction='column'>
-            <Box overflow={{ sm: "scroll", lg: "hidden" }} justify='space-between' p='22px'>
-
+        <Card p="0px" maxW={{ sm: "320px", md: "100%" }}>
+          <Flex direction="column">
+            <Box overflow={{ sm: "scroll", lg: "hidden" }} p="22px">
+              <Heading size="md" mb="4">Organisation Détails</Heading>
+              <Flex align="center" mb="4">
+                <Avatar src={avatar} size="xl" mr="4" />
+                <Box>
+                  <Text fontWeight="bold" fontSize="xl">{userDetails.organisation}</Text>
+                  <Text fontSize="sm">A pris en charge l'incident</Text>
+                </Box>
+              </Flex>
+              <Box>
+                <Text fontSize="lg" fontWeight="bold">Contact Information</Text>
+                <Text>Email: {userDetails.email}</Text>
+                <Text>Téléphone: {userDetails.phone}</Text>
+              </Box>
             </Box>
           </Flex>
         </Card>
-
-
       </Grid>
     </Flex>
   );
