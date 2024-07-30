@@ -69,12 +69,9 @@ export default function GlobalViewCollaboration() {
                 'Content-Type': 'application/json'
             }
         });
-        fetchCollaborations();
-        setNewCollaborationData({
-            incident: incidentId.id,
-            user: userId,
-            end_date: selectedDate
-        });
+
+        return response;
+        // fetchCollaborations();
     } catch (error) {
         console.error('Erreur lors de la création de la collaboration : ', error);
         throw error;
@@ -88,8 +85,24 @@ export default function GlobalViewCollaboration() {
         return
     }
       try {
-          await createCollaboration();
-          Swal.fire("Succès","La demande de collaboration a été envoyée !");
+        setNewCollaborationData({
+          incident: incident.id,
+          user: userId,
+          end_date: selectedDate
+        });
+          let response = await createCollaboration();
+          if(response.status === 201){
+            Swal.fire("Succès","La demande de collaboration a été envoyée !");
+            setNewCollaborationData({
+              incident: incident.id,
+              user: userId,
+              end_date: ''
+            });
+            setSelectedDate('')
+          }else{
+            Swal.fire("Erreur",
+                "Une erreur s'est produite lors de l'envoi de la demande de collaboration. Veuillez réessayer plus tard.");
+          }
       } catch (error) {
           console.error('Erreur lors de la création de la collaboration : ', error);
           Swal.fire("Erreur",
