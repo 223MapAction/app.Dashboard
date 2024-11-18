@@ -96,61 +96,51 @@ export default function Analyze() {
         }
     };
 
-    // Initial data fetching when component mounts or when incident or incidentId changes
+    // Add this function to determine if we should show the report
+    const shouldShowReport = () => {
+        return type_incident !== "Aucun problème environnemental";
+    };
+
+    // Modify the useEffect for fetching predictions
     useEffect(() => {
         const fetchData = async () => {
             try {
-                // Fetch existing prediction for the incident
-                const existingPrediction = await fetchPredictionsByIncidentId(
-                    incidentId
-                );
-
-                console.log("Existing prediction:", existingPrediction); // Log prediction
-
-                // Check if prediction exists
-                const predictionExists =
-                    (Array.isArray(existingPrediction) &&
-                        existingPrediction.length > 0) ||
-                    (typeof existingPrediction === "object" &&
-                        existingPrediction !== null &&
-                        Object.keys(existingPrediction).length > 0);
-
-                if (predictionExists) {
-                    console.log(
-                        "Prediction already exists, skipping prediction."
+                // Only fetch prediction if we should show the report
+                if (shouldShowReport()) {
+                    const existingPrediction = await fetchPredictionsByIncidentId(
+                        incidentId
                     );
-                    // If existingPrediction is an array, take the first element
-                    const validPrediction = Array.isArray(existingPrediction)
-                        ? existingPrediction[0]
-                        : existingPrediction;
-                    setPrediction(validPrediction); // Set the prediction if it exists
-                    setIsLoadingContext(false); // Context is available
-                } else {
-                    if (imgUrl) {
-                        // Updated condition to check imgUrl instead of incident.photo
-                        if (!predictionSentRef.current) {
-                            console.log("Sending prediction as none exists.");
-                            await sendPrediction(); // Send prediction if no existing one is found
-                            predictionSentRef.current = true; // Mark that prediction has been sent
-                        }
-                        // After sending prediction, wait for it to become available
-                        setIsLoadingContext(true);
-                    } else {
-                        console.log(
-                            "Incident photo is not available yet, skipping prediction."
-                        );
-                        setIsLoadingContext(false); // No context will be available
+
+                    console.log("Existing prediction:", existingPrediction);
+
+                    const predictionExists =
+                        (Array.isArray(existingPrediction) &&
+                            existingPrediction.length > 0) ||
+                        (typeof existingPrediction === "object" &&
+                            existingPrediction !== null &&
+                            Object.keys(existingPrediction).length > 0);
+
+                    if (predictionExists) {
+                        const validPrediction = Array.isArray(
+                            existingPrediction
+                        )
+                            ? existingPrediction[0]
+                            : existingPrediction;
+                        setPrediction(validPrediction);
+                    } else if (imgUrl && !predictionSentRef.current) {
+                        await sendPrediction();
+                        predictionSentRef.current = true;
                     }
                 }
+                setIsLoadingContext(false);
             } catch (error) {
                 console.error("Error fetching or sending prediction:", error);
-                setIsLoadingContext(false); // Stop loading on error
+                setIsLoadingContext(false);
             }
         };
 
         fetchData();
     }, [incident, incidentId]);
-    // Removed sendPrediction from dependencies
 
     // Polling to check for context availability if it's loading and prediction is not yet available
     useEffect(() => {
@@ -260,8 +250,7 @@ export default function Analyze() {
                             justify="space-between"
                             p="22px"
                         >
-                            {isLoadingContext || !prediction ? (
-                                // Display loading state with header, spinner, and QuotesCarousel
+                            {isLoadingContext ? (
                                 <Box textAlign="center">
                                     <Heading size="md" mb="4">
                                         L'analyse est en cours et le rapport
@@ -276,8 +265,42 @@ export default function Analyze() {
                                     </Flex>
                                     <QuotesCarousel />
                                 </Box>
+                            ) : type_incident ===
+                              "Aucun problème environnemental" ? (
+                                <Box mb="4" minH="200px">
+                                    <Heading as="h6" size="md" mb="4">
+                                        Rapport d'Analyse
+                                    </Heading>
+                                    <Text mb="4" fontWeight="bold">
+                                        Notre modèle a analysé l'image de
+                                        l'incident mais n'a détecté aucun
+                                        problème environnemental. Par
+                                        conséquent, aucun rapport détaillé n'a
+                                        été généré.
+                                    </Text>
+                                    <Text
+                                        mb="4"
+                                        fontWeight="bold"
+                                        color="gray.600"
+                                    >
+                                        Note: Notre modèle utilise
+                                        l'intelligence artificielle et peut donc
+                                        ne pas être parfait. Si vous pensez
+                                        qu'il s'est trompé, vous pouvez toujours
+                                        poursuivre l'analyse de l'incident via
+                                        MapChat.
+                                    </Text>
+                                    <Flex gap="4">
+                                        <Button
+                                            onClick={handleNavigateLLM}
+                                            colorScheme="teal"
+                                        >
+                                            MapChat
+                                        </Button>
+                                    </Flex>
+                                </Box>
                             ) : (
-                                // Display full report when prediction is available
+                                // Existing report display code
                                 <Box mb="4" minH="200px">
                                     <Heading as="h6" size="md" mb="4">
                                         Rapport d'Analyse
