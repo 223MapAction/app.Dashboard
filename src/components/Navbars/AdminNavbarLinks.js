@@ -348,7 +348,7 @@ export default function HeaderLinks(props) {
 
       <Menu>
       <MenuButton>
-          <BellIcon color={navbarIcon} w='18px' h='18px' ms="12px"/>
+          <BellIcon color={navbarIcon} w='18px' h='18px' ms="12px" data-testid="notifications-icon"/>
           {unreadNotificationsCount > 0 && (
             <Box
                 position="absolute"
