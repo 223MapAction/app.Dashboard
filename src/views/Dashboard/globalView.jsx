@@ -47,6 +47,7 @@ export default function GlobalView() {
     } = IncidentData();
     console.log(videoUrl);
     console.log(audioUrl);
+    console.log("L'image de l'incident", imgUrl);
 
     const { colorMode } = useColorMode();
     const textColor = useColorModeValue("gray.700", "white");
