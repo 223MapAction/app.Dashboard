@@ -41,8 +41,9 @@ export const IncidentData = () => {
 
     const imgUrl =
         incident && incident.photo && incident.photo !== "null"
-            ? `${config.url}${incident.photo}`
+            ? incident.photo.signedURL
             : "";
+        
     const audioUrl =
         incident && incident.audio && incident.audio !== "null"
             ? `${config.url}${incident.audio}`
