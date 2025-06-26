@@ -480,8 +480,24 @@ export const IncidentData = () => {
                 longitude
             );
 
+            // Handle different photo formats (Supabase vs old format)
+            let imageUrl;
+            if (typeof incident.photo === "object" && incident.photo !== null) {
+                // Supabase storage format
+                imageUrl =
+                    incident.photo.signedURL ||
+                    incident.photo.signedUrl ||
+                    incident.photo.url;
+            } else if (typeof incident.photo === "string") {
+                // Old format or direct URL
+                imageUrl = incident.photo;
+            } else {
+                console.error("Invalid photo format:", incident.photo);
+                return;
+            }
+
             const payload = {
-                image_name: incident.photo,
+                image_name: imageUrl,
                 sensitive_structures: sensitiveStructures,
                 incident_id: incidentId,
                 user_id: userId,
